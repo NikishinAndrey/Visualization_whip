@@ -82,22 +82,19 @@ def update(frame):
     # print(frame)
     global x, y, velocity_x_last, velocity_y_last, x_last, y_last, F_x, F_y
 
-    for j in range(num_points):
-        # print(i, j)
-        if j == 0:
-            delta_x = x[j + 1] - x[j]
-            delta_y = y[j + 1] - y[j]
-            l1 = np.sqrt(delta_x ** 2 + delta_y ** 2)
-            F_x[j] = (l1 - a) * delta_x / l1
-            F_y[j] = (l1 - a) * delta_y / l1
-            velocity_x[j] = 0
-            velocity_y[j] = 0
-            continue
+    delta_x = x[1] - x[0]
+    delta_y = y[1] - y[0]
+    l1 = np.sqrt(delta_x ** 2 + delta_y ** 2)
+    F_x[0] = (l1 - a) * delta_x / l1
+    F_y[0] = (l1 - a) * delta_y / l1
+    velocity_x[0] = 0
+    velocity_y[0] = 0
 
-        if j == num_points - 1:
-            velocity_x[j] = 0
-            velocity_y[j] = 0
-            continue
+    velocity_x[num_points - 1] = 0
+    velocity_y[num_points - 1] = 0
+
+    for j in range(1, num_points - 1):
+        # print(i, j)
 
         delta_x = x[j + 1] - x[j]
         delta_y = y[j + 1] - y[j]
@@ -108,61 +105,13 @@ def update(frame):
 
         velocity_x[j] = velocity_x_last[j] + (F_x[j] - F_x[j - 1]) * dt / (4 * np.pi ** 2)
         velocity_y[j] = velocity_y_last[j] + (F_y[j] - F_y[j - 1] - coefficient) * dt / (4 * np.pi ** 2)
-        # print(vel_y[j])
-
-    # print(f'Скорость Ox = {vel_x}')
-    # print(f'Скорость Oy = {vel_y}')
 
     velocity_x_last = velocity_x.copy()
     velocity_y_last = velocity_y.copy()
 
     for j in range(num_points):
-        # print(f'Скорость Ox = {vel_x[j]}')
-        # if j == 0 or j == num_points-1:
-        #     continue
         x[j] = x_last[j] + velocity_x[j] * dt
-        # print(x[j] - x[j-1])
-        # if abs(x[j] - x[j - 1]) < 0.3 * a:
-        #     if (x[j] - x[j - 1]) > 0:
-        #         # x[j] = x_last[j] + 0.3 * a
-        #         x[j] = 0.3 * a
-        #     else:
-        #         x[j] = - 0.3 * a
-        #         # x[j] = x_last[j] - 0.3 * a
-        # if abs(x[j] - x[j - 1]) > 1.5 * a:
-        #     if (x[j] - x[j - 1]) > 0:
-        #         # x[j] = x_last[j] + 1.5 * a
-        #         x[j] = 1.5 * a
-        #     else:
-        #         x[j] = - 1.5 * a
-        #         # x[j] = x_last[j] - 1.5 * a
-
-        # print(f'x = {x[j]}')
-        # print(f'Скорость Oy = {vel_y[j]}')
         y[j] = y_last[j] + velocity_y[j] * dt
-
-        # if abs(y[j] - y[j-1]) < 0.3*a:
-        #     if (y[j] - y[j - 1]) > 0:
-        #         # y[j] = y_last[j] + 0.3 * a
-        #         y[j] = 0.3 * a
-        #     else:
-        #         # y[j] = y_last[j] - 0.3 * a
-        #         y[j] = - 0.3 * a
-        # if abs(y[j] - y[j-1]) > 1.5 * a:
-        #     if (y[j] - y[j - 1]) > 0:
-        #         # y[j] = y_last[j] + 1.5 * a
-        #         y[j] = 1.5 * a
-        #     else:
-        #         y[j] = -1.5 * a
-        #         # y[j] = y_last[j] - 1.5 * a
-
-        # if (y[j] - y_last[j]) > 0.5*a:
-        #     y[j] = y_last[j] + 0.5*a
-        # print(f'y = {y[j]}')
-
-    # print(f'x = {x}')
-    # print(f'y = {y}')
-
     x_last = x.copy()
     y_last = y.copy()
 
