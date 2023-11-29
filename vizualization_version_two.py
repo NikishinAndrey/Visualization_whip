@@ -42,9 +42,9 @@ velocity_y_last = np.cos(np.linspace(0, 2 * np.pi, num_points))
 # vel_y_last[10] = 10
 
 
-velocity_x = np.zeros(num_points)
+velocity_x = np.zeros(num_points) / length * tau
 
-velocity_y = np.zeros(num_points)
+velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
 
 F_x = np.zeros(num_points - 1)
 F_y = np.zeros(num_points - 1)
@@ -98,8 +98,8 @@ def update(frame):
         # print(i, j)
 
         if j == num_points - 1:
-            velocity_x[j] = velocity_x_last[j] + (-F_x[j - 1]) * dt / (4 * np.pi ** 2)
-            velocity_y[j] = velocity_y_last[j] + (-F_y[j - 1] - coefficient) * dt / (4 * np.pi ** 2)
+            velocity_x[j] = velocity_x[j] + (-F_x[j - 1]) * dt / (4 * np.pi ** 2)
+            velocity_y[j] = velocity_y[j] + (-F_y[j - 1] - coefficient) * dt / (4 * np.pi ** 2)
             continue
 
         delta_x = x[j + 1] - x[j]
@@ -109,11 +109,11 @@ def update(frame):
         F_x[j] = (l1 - a) * delta_x / l1
         F_y[j] = (l1 - a) * delta_y / l1
 
-        velocity_x[j] = velocity_x_last[j] + (F_x[j] - F_x[j - 1]) * dt / (4 * np.pi ** 2)
-        velocity_y[j] = velocity_y_last[j] + (F_y[j] - F_y[j - 1] - coefficient) * dt / (4 * np.pi ** 2)
+        velocity_x[j] = velocity_x[j] + (F_x[j] - F_x[j - 1]) * dt / (4 * np.pi ** 2)
+        velocity_y[j] = velocity_y[j] + (F_y[j] - F_y[j - 1] - coefficient) * dt / (4 * np.pi ** 2)
 
-    velocity_x_last = velocity_x.copy()
-    velocity_y_last = velocity_y.copy()
+    # velocity_x_last = velocity_x.copy()
+    # velocity_y_last = velocity_y.copy()
 
     for j in range(num_points):
         x[j] = x_last[j] + velocity_x[j] * dt
