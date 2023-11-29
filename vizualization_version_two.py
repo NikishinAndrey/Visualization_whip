@@ -6,8 +6,8 @@ from matplotlib.animation import FuncAnimation
 
 # Параметры веревки
 length = 0.5  # длина веревки
-num_points = 20  # количество точек на веревке
-time_steps = 500  # количество временных шагов
+num_points = 40  # количество точек на веревке
+time_steps = 1000  # количество временных шагов
 # dt = 0.005  # шаг по времени
 c = 500
 m = 10
@@ -21,10 +21,10 @@ x_0 = np.linspace(0, length, num_points) / length
 
 # Начальные условия оси Oy
 
-# y_0 = np.sin(np.linspace(0, 2 * np.pi, num_points))
-y_0 = np.zeros(num_points)  # изначально точки находятся на линии y = 0
+y_0 = np.sin(np.linspace(0, 2 * np.pi, num_points))
+# y_0 = np.zeros(num_points)  # изначально точки находятся на линии y = 0
 
-y_0[-1] = 100
+# y_0[-1] = 1
 y_0 = y_0 / length
 
 x_last = x_0.copy()
@@ -37,7 +37,8 @@ y = y_0.copy()
 velocity_x_last = np.zeros(num_points) / length * tau
 
 # Нулевые начальные условия на скорость вдоль оси Oy
-velocity_y_last = np.zeros(num_points) / length * tau
+# velocity_y_last = np.zeros(num_points) / length * tau
+velocity_y_last = np.cos(np.linspace(0, 2 * np.pi, num_points))
 # vel_y_last[10] = 10
 
 
@@ -60,10 +61,10 @@ y[0] = 0
 velocity_x[0] = 0
 velocity_y[0] = 0
 
-x[num_points - 1] = 1
-y[num_points - 1] = 0
-velocity_x[num_points - 1] = 0
-velocity_y[num_points - 1] = 0
+# x[num_points - 1] = 1
+# y[num_points - 1] = 0
+# velocity_x[num_points - 1] = 0
+# velocity_y[num_points - 1] = 0
 
 a = 1 / num_points
 coefficient = (m * g) / (c * length)
@@ -90,11 +91,16 @@ def update(frame):
     velocity_x[0] = 0
     velocity_y[0] = 0
 
-    velocity_x[num_points - 1] = 0
-    velocity_y[num_points - 1] = 0
+    # velocity_x[num_points - 1] = 0
+    # velocity_y[num_points - 1] = 0
 
-    for j in range(1, num_points - 1):
+    for j in range(1, num_points):
         # print(i, j)
+
+        if j == num_points - 1:
+            velocity_x[j] = velocity_x_last[j] + (-F_x[j - 1]) * dt / (4 * np.pi ** 2)
+            velocity_y[j] = velocity_y_last[j] + (-F_y[j - 1] - coefficient) * dt / (4 * np.pi ** 2)
+            continue
 
         delta_x = x[j + 1] - x[j]
         delta_y = y[j + 1] - y[j]
@@ -117,7 +123,7 @@ def update(frame):
 
     if frame % 10 == 0:
         full_energy = sum(
-            0.5 * m * velocity_x_last ** 2 + 0.5 * c * ((x - x_last) ** 2 + (y - y_last) ** 2) + m * g * y)
+            0.5 * m/num_points * velocity_x_last ** 2 + 0.5 * c * ((x - x_last) ** 2 + (y - y_last) ** 2) + m/num_points * g * y)
         print(f'Цикл № {frame}', 'Полная энергия = ', full_energy)
         line.set_ydata(y)
         line.set_xdata(x)
