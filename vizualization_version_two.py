@@ -11,6 +11,8 @@ time_steps = 1000  # количество временных шагов
 # dt = 0.005  # шаг по времени
 c = 500
 m = 10
+mass_array = np.array([1+ i*9/(num_points-1) for i in range(num_points)][::-1]) # масса равномерно меняется от 1 до 10
+print(mass_array)
 g = 9.81
 # tau = np.sqrt(m / c) / (2*np.pi)
 tau = np.pi * np.sqrt(m / c)
@@ -27,22 +29,15 @@ y_0 = np.sin(np.linspace(0, 2 * np.pi, num_points))
 # y_0[-1] = 1
 y_0 = y_0 / length
 
-x_last = x_0.copy()
-y_last = y_0.copy()
-
 x = x_0.copy()
 y = y_0.copy()
 
 # Нулевые начальные условия на скорость вдоль оси Ox
-velocity_x_last = np.zeros(num_points) / length * tau
-
-# Нулевые начальные условия на скорость вдоль оси Oy
-# velocity_y_last = np.zeros(num_points) / length * tau
-velocity_y_last = np.cos(np.linspace(0, 2 * np.pi, num_points))
-# vel_y_last[10] = 10
-
 
 velocity_x = np.zeros(num_points) / length * tau
+
+# Нулевые начальные условия на скорость вдоль оси Oy
+
 
 velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
 
@@ -67,7 +62,7 @@ velocity_y[0] = 0
 # velocity_y[num_points - 1] = 0
 
 a = 1 / num_points
-coefficient = (m * g) / (c * length)
+coefficient = np.array([(mass_array[i] * g) / (c * length) for i in range(num_points)])
 # print(coefficient)
 print(0.5 * a)
 
@@ -81,7 +76,7 @@ line, = ax.plot(x, y, marker='o')
 # Функция обновления графика на каждом временном шаге
 def update(frame):
     # print(frame)
-    global x, y, velocity_x_last, velocity_y_last, x_last, y_last, F_x, F_y
+    global x, y, velocity_x, velocity_y, x, y, x_0, y_0, F_x, F_y
 
     delta_x = x[1] - x[0]
     delta_y = y[1] - y[0]
@@ -99,7 +94,7 @@ def update(frame):
 
         if j == num_points - 1:
             velocity_x[j] = velocity_x[j] + (-F_x[j - 1]) * dt / (4 * np.pi ** 2)
-            velocity_y[j] = velocity_y[j] + (-F_y[j - 1] - coefficient) * dt / (4 * np.pi ** 2)
+            velocity_y[j] = velocity_y[j] + (-F_y[j - 1] - coefficient[j]) * dt / (4 * np.pi ** 2)
             continue
 
         delta_x = x[j + 1] - x[j]
@@ -110,20 +105,19 @@ def update(frame):
         F_y[j] = (l1 - a) * delta_y / l1
 
         velocity_x[j] = velocity_x[j] + (F_x[j] - F_x[j - 1]) * dt / (4 * np.pi ** 2)
-        velocity_y[j] = velocity_y[j] + (F_y[j] - F_y[j - 1] - coefficient) * dt / (4 * np.pi ** 2)
-
-    # velocity_x_last = velocity_x.copy()
-    # velocity_y_last = velocity_y.copy()
+        velocity_y[j] = velocity_y[j] + (F_y[j] - F_y[j - 1] - coefficient[j]) * dt / (4 * np.pi ** 2)
 
     for j in range(num_points):
-        x[j] = x_last[j] + velocity_x[j] * dt
-        y[j] = y_last[j] + velocity_y[j] * dt
-    x_last = x.copy()
-    y_last = y.copy()
+        x[j] = x[j] + velocity_x[j] * dt
+        y[j] = y[j] + velocity_y[j] * dt
 
     if frame % 10 == 0:
-        full_energy = sum(
-            0.5 * m/num_points * velocity_x_last ** 2 + 0.5 * c * ((x - x_last) ** 2 + (y - y_last) ** 2) + m/num_points * g * y)
+        full_energy = 0
+        for k in range(num_points):
+            full_energy += 0.5 * c * (
+                    (x[k] - x_0[k]) ** 2 + (y[k] - y_0[k]) ** 2) ** 0.5 + 0.5 * m * velocity_x[k] ** 2 + m * g * (
+                                       y[k] - y_0[k])
+
         print(f'Цикл № {frame}', 'Полная энергия = ', full_energy)
         line.set_ydata(y)
         line.set_xdata(x)
