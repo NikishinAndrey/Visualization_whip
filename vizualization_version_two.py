@@ -1,21 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+# from matplotlib.animation import FuncAnimation
+from matplotlib.animation import FuncAnimation, PillowWriter
 
 # Параметры веревки
 
 # Параметры веревки
 length = 0.5  # длина веревки
 num_points = 40  # количество точек на веревке
-time_steps = 1000  # количество временных шагов
+time_steps = 1000 # количество временных шагов
 # dt = 0.005  # шаг по времени
-c = 500
-m = 10
-mass_array = np.array([1+ i*9/(num_points-1) for i in range(num_points)][::-1]) # масса равномерно меняется от 1 до 10
+c = 10
+m = 1
+mass_array = np.array([0.01 + i*0.05/(num_points-1) for i in range(num_points)][::-1]) # масса равномерно меняется от 1 до 10
 print(mass_array)
+print(sum(mass_array))
 g = 9.81
+
+num_gu = 1 # количество точек закрепления
 # tau = np.sqrt(m / c) / (2*np.pi)
-tau = np.pi * np.sqrt(m / c)
+tau = np.pi * np.sqrt(mass_array[0] / c)
 
 # Начальные условия оси Ox
 
@@ -39,10 +43,13 @@ velocity_x = np.zeros(num_points) / length * tau
 # Нулевые начальные условия на скорость вдоль оси Oy
 
 
-velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
+# velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
+velocity_y = np.zeros(num_points) / length * tau
 
-F_x = np.zeros(num_points - 1)
-F_y = np.zeros(num_points - 1)
+F_x = np.zeros(num_points - num_gu)
+F_y = np.zeros(num_points - num_gu)
+
+print(len(F_x))
 
 t = np.linspace(0, 50 * tau, time_steps) / tau
 
@@ -55,6 +62,19 @@ x[0] = 0
 y[0] = 0
 velocity_x[0] = 0
 velocity_y[0] = 0
+
+
+# x[1] = x_0[1]
+# y[1] = y_0[1]
+# velocity_x[1] = 0
+# velocity_y[1] = 0
+#
+# x[2] = x_0[2]
+# y[2] = y_0[2]
+# velocity_x[2] = 0
+# velocity_y[2] = 0
+
+
 
 # x[num_points - 1] = 1
 # y[num_points - 1] = 0
@@ -78,16 +98,28 @@ def update(frame):
     # print(frame)
     global x, y, velocity_x, velocity_y, x, y, x_0, y_0, F_x, F_y
 
-    delta_x = x[1] - x[0]
-    delta_y = y[1] - y[0]
+    delta_x = x[num_gu] - x[num_gu-1]
+    delta_y = y[num_gu] - y[num_gu-1]
     l1 = np.sqrt(delta_x ** 2 + delta_y ** 2)
     F_x[0] = (l1 - a) * delta_x / l1
     F_y[0] = (l1 - a) * delta_y / l1
-    velocity_x[0] = 0
-    velocity_y[0] = 0
+    # velocity_x[0] = 0
+    # velocity_y[0] = 0
 
-    # velocity_x[num_points - 1] = 0
-    # velocity_y[num_points - 1] = 0
+    if (frame % int((time_steps / 50))  == 0) and (frame < 1000):
+        velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
+    elif (frame % int((time_steps / 50)) == 0) and (frame > 1000) and (frame < 2000):
+        velocity_y = -2 * np.cos(np.linspace(0, 2 * np.pi, num_points))
+    elif (frame % int((time_steps / 50)) == 0) and (frame > 2000):
+        velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
+
+
+
+
+        # velocity_x[0] = 0
+        # velocity_y[0] = 0
+
+
 
     for j in range(1, num_points):
         # print(i, j)
@@ -104,6 +136,7 @@ def update(frame):
         F_x[j] = (l1 - a) * delta_x / l1
         F_y[j] = (l1 - a) * delta_y / l1
 
+
         velocity_x[j] = velocity_x[j] + (F_x[j] - F_x[j - 1]) * dt / (4 * np.pi ** 2)
         velocity_y[j] = velocity_y[j] + (F_y[j] - F_y[j - 1] - coefficient[j]) * dt / (4 * np.pi ** 2)
 
@@ -111,21 +144,28 @@ def update(frame):
         x[j] = x[j] + velocity_x[j] * dt
         y[j] = y[j] + velocity_y[j] * dt
 
-    if frame % 10 == 0:
+    if frame % 50 == 0:
         full_energy = 0
         for k in range(num_points):
             full_energy += 0.5 * c * (
                     (x[k] - x_0[k]) ** 2 + (y[k] - y_0[k]) ** 2) ** 0.5 + 0.5 * m * velocity_x[k] ** 2 + m * g * (
                                        y[k] - y_0[k])
 
-        print(f'Цикл № {frame}', 'Полная энергия = ', full_energy)
+        # print(f'Цикл № {frame}', 'Полная энергия = ', full_energy)
+        print(f'Цикл № {frame}')
         line.set_ydata(y)
         line.set_xdata(x)
     return line,
 
 
 # Создание анимации
-ani = FuncAnimation(fig, update, frames=1000000, interval=1, blit=True)
+ani = FuncAnimation(fig, update, frames=100000, interval=1, blit=True)
+
+# Сохранение анимации в видеофайл GIF
+# ani.save('animation_2.gif', writer='pillow', fps=40)
+
+# ani.save("TLI.gif", dpi=300, writer=PillowWriter(fps=25))
+
 
 # Отображение анимации
 plt.xlabel('X')
