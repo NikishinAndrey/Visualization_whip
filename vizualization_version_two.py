@@ -7,15 +7,15 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 
 # Параметры веревки
 length = 0.5  # длина веревки
-num_points = 30  # количество точек на веревке
+num_points = 50  # количество точек на веревке
 time_steps = 50000  # количество временных шагов
 # dt = 0.005  # шаг по времени
-c = 500
-M = 4
+c = 50
+M = 2
 m = 0.1
 # mass_array = np.array(
 #     [1 + i * 1 / (num_points - 1) for i in range(num_points)][::-1])/60  # масса равномерно меняется от 1 до 10
-mass_array = np.array([M - (M - m) / num_points * i for i in range(num_points)]) / 100
+mass_array = np.array([M - (M - m) / num_points * i for i in range(num_points)]) / 40
 print(mass_array)
 print(sum(mass_array))
 g = 9.81
@@ -124,12 +124,15 @@ def update(frame):
 
     # govnokod
     if (frame == 1):
-        velocity_y[0] = flag * 10
+        velocity_y[0] = flag * 5
         flag = flag * (-1)
-    if (frame == frame_count) and (frame != 0):
-        velocity_y[0] = flag * 10
+    if (frame == frame_count) and (frame != 0) and (frame <= 4000):
+        velocity_y[0] = flag * 5
         flag = flag * (-1)
         frame_count += 1000
+    if (frame > 4000):
+        velocity_y[0] = 0
+
 
     # velocity_x[0] = 0
     # velocity_y[0] = 0
@@ -154,8 +157,9 @@ def update(frame):
     for j in range(num_points):
         x[j] = x[j] + velocity_x[j] * dt
         y[j] = y[j] + velocity_y[j] * dt
-        if 1<=j<=num_points-2:
+        if (1<=j<=num_points-2) and (y[j] < y[j-1]):
             x[j] = max(x[j], x[j-1])
+
 
 
     if frame % 50 == 0:
