@@ -8,21 +8,21 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 # Параметры веревки
 length = 0.5  # длина веревки
 num_points = 40  # количество точек на веревке
-time_steps = 5000  # количество временных шагов
+time_steps = 100000  # количество временных шагов
 # dt = 0.005  # шаг по времени
-c = 100
-M = 2
-m = 1
+c = 500
+M = 4
+m = 0.1
 # mass_array = np.array(
 #     [1 + i * 1 / (num_points - 1) for i in range(num_points)][::-1])/60  # масса равномерно меняется от 1 до 10
-mass_array = np.array([M - (M-m)/num_points*i for i in range(num_points)])
+mass_array = np.array([M - (M-m)/num_points*i for i in range(num_points)]) / 100
 print(mass_array)
 print(sum(mass_array))
 g = 9.81
 
 num_gu = 1  # количество точек закрепления
 # tau = np.sqrt(m / c) / (2*np.pi)
-tau =  np.sqrt(mass_array[0] / c) / np.pi
+tau = np.pi*np.sqrt(mass_array[0] / c)
 
 # Начальные условия оси Ox
 
@@ -31,7 +31,7 @@ x_0 = np.linspace(0, length, num_points) / length
 # Начальные условия оси Oy
 
 # y_0 = np.sin(np.linspace(0, 2 * np.pi, num_points))
-y_0 = np.zeros(num_points)  # изначально точки находятся на линии y = 0
+y_0 = np.zeros(num_points) # изначально точки находятся на линии y = 0
 
 # y_0[-1] = 1
 y_0 = y_0 / length
@@ -58,8 +58,8 @@ t = np.linspace(0, 50 * tau, time_steps) / tau
 
 print(f'tau = {tau}')
 
-print(f'Шаг времени деленный на период = {t[1] / tau}')
 dt = t[1] - t[0]
+print(f'Шаг времени деленный на период = {dt/ tau}')
 
 x[0] = 0
 y[0] = 0
@@ -97,10 +97,12 @@ line, = ax.plot(x, y, marker='o')
 # Функция обновления графика на каждом временном шаге
 flag = 1
 
+frame_count = 500
+
 
 def update(frame):
     # print(frame)
-    global x, y, velocity_x, velocity_y, x, y, x_0, y_0, F_x, F_y, flag
+    global x, y, velocity_x, velocity_y, x, y, x_0, y_0, F_x, F_y, flag, frame_count
 
     delta_x = x[num_gu] - x[num_gu - 1]
     delta_y = y[num_gu] - y[num_gu - 1]
@@ -110,18 +112,53 @@ def update(frame):
     # velocity_x[0] = 0
     # velocity_y[0] = 0
 
-    # if (frame % 500 == 0):
-    #     velocity_y = flag *np.cos(np.linspace(0, 2 * np.pi, num_points))
+    # if (frame == 1):
+    #     velocity_y[0] = flag * 10
     #     flag = flag * (-1)
+    # if (frame % 500 == 0) and (frame != 0):
+    #     velocity_y[0] = flag * 10
+    #     flag = flag * (-1)
+    # if (frame == 1):
+    #     velocity_y[num_points-1] = flag
+    #     # flag = flag * (-1)
 
-    if (frame == 0):
-        velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
-    if (frame == 500):
-        velocity_y = -np.cos(np.linspace(0, 2 * np.pi, num_points))
-    if (frame == 1500):
-        velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
-    if (frame == 2000):
-        velocity_y = np.zeros(num_points)
+    # govnokod
+    if (frame == 1):
+        velocity_y[0] = flag * 10
+        flag = flag * (-1)
+    if (frame == 500) and (frame != 0):
+        velocity_y[0] = flag * 10
+        flag = flag * (-1)
+    if (frame == 1500) and (frame != 0):
+        velocity_y[0] = flag * 10
+        flag = flag * (-1)
+    if (frame == 2500) and (frame != 0):
+        velocity_y[0] = flag * 10
+        flag = flag * (-1)
+    if (frame == 3500) and (frame != 0):
+        velocity_y[0] = flag * 10
+        flag = flag * (-1)
+    if (frame == 4500) and (frame != 0):
+        velocity_y[0] = flag * 10
+        flag = flag * (-1)
+    if (frame == 5500) and (frame != 0):
+        velocity_y[0] = flag * 10
+        flag = flag * (-1)
+    if (frame == 6500) and (frame != 0):
+        velocity_y[0] = flag * 10
+        flag = flag * (-1)
+    if (frame == 7500) and (frame != 0):
+        velocity_y[0] = flag * 10
+        flag = flag * (-1)
+
+    # if (frame == 0):
+    #     velocity_y[num_points-1] = 1
+    # if (frame == 500):
+    #     velocity_y[num_points-1] = -1
+    # if (frame == 1500):
+    #     velocity_y[num_points-1] = 1
+    # if (frame == 2000):
+    #     velocity_y[num_points-1] = -1
 
 
         # velocity_x[0] = 0
@@ -131,8 +168,8 @@ def update(frame):
         # print(i, j)
 
         if j == num_points - 1:
-            velocity_x[j] = velocity_x[j] + (-F_x[j - 1]) * dt / (4 * np.pi ** 2)
-            velocity_y[j] = velocity_y[j] + (-F_y[j - 1] - coefficient[j]) * dt / (4 * np.pi ** 2)
+            velocity_x[j] = velocity_x[j] + (-F_x[j - 1]) * dt * (4 * np.pi ** 2)
+            velocity_y[j] = velocity_y[j] + (-F_y[j - 1] - coefficient[j]) * dt * (4 * np.pi ** 2)
             continue
 
         delta_x = x[j + 1] - x[j]
@@ -142,8 +179,8 @@ def update(frame):
         F_x[j] = (l1 - a) * delta_x / l1
         F_y[j] = (l1 - a) * delta_y / l1
 
-        velocity_x[j] = velocity_x[j] + (F_x[j] - F_x[j - 1]) * dt / (4 * np.pi ** 2)
-        velocity_y[j] = velocity_y[j] + (F_y[j] - F_y[j - 1] - coefficient[j]) * dt / (4 * np.pi ** 2)
+        velocity_x[j] = velocity_x[j] + (F_x[j] - F_x[j - 1]) * dt * (4 * np.pi ** 2)
+        velocity_y[j] = velocity_y[j] + (F_y[j] - F_y[j - 1] - coefficient[j]) * dt * (4 * np.pi ** 2)
 
     for j in range(num_points):
         x[j] = x[j] + velocity_x[j] * dt
