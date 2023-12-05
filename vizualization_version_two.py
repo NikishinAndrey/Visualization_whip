@@ -154,6 +154,9 @@ def update(frame):
     for j in range(num_points):
         x[j] = x[j] + velocity_x[j] * dt
         y[j] = y[j] + velocity_y[j] * dt
+        if 1<=j<=num_points-2:
+            x[j] = max(x[j], x[j-1])
+
 
     if frame % 50 == 0:
         full_energy = 0
