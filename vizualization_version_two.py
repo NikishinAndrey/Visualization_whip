@@ -8,19 +8,21 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 # Параметры веревки
 length = 0.5  # длина веревки
 num_points = 40  # количество точек на веревке
-time_steps = 1000  # количество временных шагов
+time_steps = 5000  # количество временных шагов
 # dt = 0.005  # шаг по времени
-c = 10
+c = 100
+M = 2
 m = 1
-mass_array = np.array(
-    [1 + i * 1 / (num_points - 1) for i in range(num_points)][::-1])/60  # масса равномерно меняется от 1 до 10
+# mass_array = np.array(
+#     [1 + i * 1 / (num_points - 1) for i in range(num_points)][::-1])/60  # масса равномерно меняется от 1 до 10
+mass_array = np.array([M - (M-m)/num_points*i for i in range(num_points)])
 print(mass_array)
 print(sum(mass_array))
 g = 9.81
 
 num_gu = 1  # количество точек закрепления
 # tau = np.sqrt(m / c) / (2*np.pi)
-tau = np.pi * np.sqrt(mass_array[0] / c)
+tau =  np.sqrt(mass_array[0] / c) / np.pi
 
 # Начальные условия оси Ox
 
@@ -28,8 +30,8 @@ x_0 = np.linspace(0, length, num_points) / length
 
 # Начальные условия оси Oy
 
-y_0 = np.sin(np.linspace(0, 2 * np.pi, num_points))
-# y_0 = np.zeros(num_points)  # изначально точки находятся на линии y = 0
+# y_0 = np.sin(np.linspace(0, 2 * np.pi, num_points))
+y_0 = np.zeros(num_points)  # изначально точки находятся на линии y = 0
 
 # y_0[-1] = 1
 y_0 = y_0 / length
@@ -87,7 +89,8 @@ print(0.5 * a)
 
 # Создание графика
 fig, ax = plt.subplots()
-plt.ylim(-100, 100)
+# plt.ylim(-100, 100)
+plt.ylim(-10, 10)
 line, = ax.plot(x, y, marker='o')
 
 # надо в разных циклах искать скорости и перемещения
@@ -107,9 +110,19 @@ def update(frame):
     # velocity_x[0] = 0
     # velocity_y[0] = 0
 
-    if (frame % 500 == 0):
-        velocity_y = flag *np.cos(np.linspace(0, 2 * np.pi, num_points))
-        flag = flag * (-1)
+    # if (frame % 500 == 0):
+    #     velocity_y = flag *np.cos(np.linspace(0, 2 * np.pi, num_points))
+    #     flag = flag * (-1)
+
+    if (frame == 0):
+        velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
+    if (frame == 500):
+        velocity_y = -np.cos(np.linspace(0, 2 * np.pi, num_points))
+    if (frame == 1500):
+        velocity_y = np.cos(np.linspace(0, 2 * np.pi, num_points))
+    if (frame == 2000):
+        velocity_y = np.zeros(num_points)
+
 
         # velocity_x[0] = 0
         # velocity_y[0] = 0
